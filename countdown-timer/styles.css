@@ -1,0 +1,39 @@
+body {
+  font-family: "Abril Fatface", serif;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.countdown {
+  height: 100vh;
+  background-color: #f4f9e9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#showCountdown {
+  font-size: 14rem;
+  text-transform: uppercase;
+  display: none;
+}
+
+#startBtn {
+  font-size: 4rem;
+  text-transform: uppercase;
+  padding: 10px;
+  background: #fff;
+  border-radius: 10px;
+  border: none;
+  box-shadow: 0px 8px 4px #000;
+  outline: none;
+}
+
+#startBtn:active {
+  box-shadow: 0px 1px 1px #000;
+  transform: translateY(3px);
+}

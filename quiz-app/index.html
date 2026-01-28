@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en" class="bg-gray-900 text-white min-h-screen">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="flex items-center justify-center min-h-screen p-4">
+    <main class="w-full max-w-2xl">
+      <div class="container bg-gray-800 rounded-2xl shadow-2xl overflow-hidden">
+        <!-- Start Screen -->
+        <div
+          id="start-screen"
+          class="screen flex flex-col items-center justify-center min-h-screen p-8 text-center"
+        >
+          <h1 class="text-5xl font-bold mb-6 text-cyan-400">Quiz Time!</h1>
+          <p class="text-xl mb-10 text-gray-300">
+            Hello there! Hope you like playing with knowledge
+          </p>
+          <button
+            id="start-button"
+            class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-4 px-10 rounded-xl text-xl transition transform hover:scale-105"
+          >
+            Start Quiz
+          </button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="screen hidden flex flex-col p-8">
+          <div class="quiz-header mb-8">
+            <h2 id="question-text" class="text-3xl font-bold text-center mb-6">
+              Your questions will be here
+            </h2>
+            <div class="quiz-info flex justify-between text-lg text-gray-300">
+              <p>
+                Question
+                <span id="current-question" class="text-cyan-400 font-bold"
+                  >1</span
+                >
+                of
+                <span id="total-questions" class="text-cyan-400 font-bold"
+                  >10</span
+                >
+              </p>
+              <p>
+                Score:
+                <span id="current-score" class="text-cyan-400 font-bold"
+                  >0</span
+                >
+              </p>
+            </div>
+          </div>
+
+          <!-- Answer Options (JS se dynamically buttons yahan add kar) -->
+          <div
+            id="answer-options"
+            class="grid grid-cols-1 md:grid-cols-2 gap-6 my-10"
+          >
+            <!-- Example placeholder buttons -->
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="w-full bg-gray-700 rounded-full h-4 mt-auto">
+            <div
+              id="progress"
+              class="bg-cyan-500 h-4 rounded-full transition-all duration-500"
+              style="width: 0%"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div
+          id="result-screen"
+          class="screen hidden flex flex-col items-center justify-center min-h-screen p-8 text-center"
+        >
+          <h1 class="text-5xl font-bold mb-8 text-cyan-400">Quiz Completed!</h1>
+          <div class="result-info text-3xl mb-6">
+            <p>
+              You scored
+              <span id="result-score" class="text-cyan-400 font-bold">0</span>
+              out of
+              <span id="result-total" class="text-cyan-400 font-bold">10</span>
+            </p>
+          </div>
+          <div id="result-message" class="text-xl text-gray-300 mb-10 max-w-lg">
+            Great effort! Keep practicing and you'll get better every time! 🚀
+          </div>
+          <button
+            id="restart-btn"
+            class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-4 px-10 rounded-xl text-xl transition transform hover:scale-105"
+          >
+            Restart Quiz
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

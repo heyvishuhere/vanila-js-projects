@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3GS AI Particle System</title>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
+
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        background: #000;
+        font-family: sans-serif;
+      }
+      #container {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+      }
+      canvas {
+        display: block;
+      }
+      #ui-overlay {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        color: white;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 15px;
+        border-radius: 10px;
+        pointer-events: none;
+        border: 1px solid #444;
+      }
+      .status {
+        color: #0f0;
+        font-weight: bold;
+      }
+      video {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        width: 200px;
+        border: 2px solid #555;
+        border-radius: 10px;
+        transform: scaleX(-1);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <div id="ui-overlay">
+        <h2>3GS Interactive System</h2>
+        <p>Status: <span class="status" id="status">Initializing...</span></p>
+        <p>Gesture: <span id="gesture">None</span></p>
+        <p>Instructions: Pinch to Expand | Move to Change Color</p>
+      </div>
+      <video id="input_video"></video>
+    </div>
+
+    <script type="module">
+      // --- 1. SET UP THREE.JS SCENE ---
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000,
+      );
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.getElementById("container").appendChild(renderer.domElement);
+
+      // --- 2. CREATE INTERACTIVE PARTICLES (Placeholder for 3GS) ---
+      // Since loading a 500MB .ply file is slow, we'll create 5000 3GS-style points
+      const geometry = new THREE.BufferGeometry();
+      const vertices = [];
+      const colors = [];
+      for (let i = 0; i < 5000; i++) {
+        vertices.push(
+          THREE.MathUtils.randFloatSpread(5),
+          THREE.MathUtils.randFloatSpread(5),
+          THREE.MathUtils.randFloatSpread(5),
+        );
+        colors.push(1, 1, 1);
+      }
+      geometry.setAttribute(
+        "position",
+        new THREE.Float32BufferAttribute(vertices, 3),
+      );
+      geometry.setAttribute(
+        "color",
+        new THREE.Float32BufferAttribute(colors, 3),
+      );
+
+      const material = new THREE.PointsMaterial({
+        size: 0.05,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.8,
+      });
+      const particles = new THREE.Points(geometry, material);
+      scene.add(particles);
+
+      camera.position.z = 5;
+
+      // --- 3. MEDIAPIPE HAND TRACKING LOGIC ---
+      const videoElement = document.getElementById("input_video");
+      const statusText = document.getElementById("status");
+      const gestureText = document.getElementById("gesture");
+
+      function onResults(results) {
+        statusText.innerText = "Running";
+        if (
+          results.multiHandLandmarks &&
+          results.multiHandLandmarks.length > 0
+        ) {
+          const hand = results.multiHandLandmarks[0];
+
+          // Landmark 8 is Index Finger, Landmark 4 is Thumb
+          const index = hand[8];
+          const thumb = hand[4];
+
+          // Calculate Expansion (Pinch distance)
+          const distance = Math.sqrt(
+            Math.pow(index.x - thumb.x, 2) + Math.pow(index.y - thumb.y, 2),
+          );
+
+          // 1. Move Particles with Hand
+          particles.position.x = (index.x - 0.5) * -10;
+          particles.position.y = (index.y - 0.5) * -10;
+
+          // 2. Expansion Logic
+          const scale = 1 + distance * 10;
+          particles.scale.set(scale, scale, scale);
+
+          // 3. Color Change Logic (Based on hand position)
+          const hue = index.x * 360;
+          particles.material.color.setHSL(index.x, 1, 0.5);
+
+          // 4. Gesture Detection for Templates
+          if (distance < 0.05) {
+            gestureText.innerText = "Heart Mode (Pinch)";
+            particles.rotation.y += 0.2; // Rapid spin for heart vibe
+          } else if (distance > 0.3) {
+            gestureText.innerText = "Fireworks (Open)";
+            particles.scale.set(scale * 2, scale * 2, scale * 2);
+          } else {
+            gestureText.innerText = "Flower Mode";
+          }
+        }
+      }
+
+      const hands = new Hands({
+        locateFile: (file) =>
+          `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
+      });
+      hands.setOptions({
+        maxNumHands: 1,
+        modelComplexity: 1,
+        minDetectionConfidence: 0.7,
+        minTrackingConfidence: 0.5,
+      });
+      hands.onResults(onResults);
+
+      const cameraFeed = new Camera(videoElement, {
+        onFrame: async () => {
+          await hands.send({ image: videoElement });
+        },
+        width: 640,
+        height: 480,
+      });
+      cameraFeed.start();
+
+      // --- 4. ANIMATION LOOP ---
+      function animate() {
+        requestAnimationFrame(animate);
+        particles.rotation.x += 0.001;
+        particles.rotation.y += 0.002;
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      // Handle Window Resize
+      window.addEventListener("resize", () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    </script>
+  </body>
+</html>
